@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Vector Database
+chromadb/
+chroma_data/
+
+# ML Models (large files)
+models/*.bin
+models/*.pt
+models/*.onnx
+models/*.pkl
+
+# Data
+data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*~
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# OS
+.DS_Store
