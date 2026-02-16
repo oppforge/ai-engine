@@ -1,0 +1,32 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+pydantic-settings
+
+# AI & LLM
+langchain
+langchain-community
+langchain-groq
+openai  # For Groq API compatibility
+
+# Vector Database
+chromadb
+sentence-transformers
+
+# Data Processing
+numpy
+pandas
+scikit-learn
+
+# HTTP
+httpx
+requests
+
+# Database (shared with backend)
+sqlalchemy
+psycopg2-binary
+
+# Utilities
+tqdm
+python-jose[cryptography]
