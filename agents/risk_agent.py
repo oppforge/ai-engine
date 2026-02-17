@@ -4,7 +4,7 @@ Risk Assessment Agent - Evaluates opportunity safety and legitimacy.
 
 import httpx
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import logging
 from datetime import datetime
 import re

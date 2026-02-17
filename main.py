@@ -7,6 +7,8 @@ from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
+from datetime import datetime
+import uuid
 import logging
 
 from config import AI_ENGINE_HOST, AI_ENGINE_PORT, ENABLE_CHROMADB
@@ -47,18 +49,26 @@ class OpportunityData(BaseModel):
     category: Optional[str] = None
     chain: Optional[str] = None
     reward_pool: Optional[str] = None
-    deadline: Optional[str] = None
+    deadline: Optional[datetime] = None
     source: Optional[str] = None
     tags: Optional[List[str]] = []
     required_skills: Optional[List[str]] = []
+    mission_requirements: Optional[List[str]] = []
+    trust_score: int = 70
     url: Optional[str] = None
+    is_verified: bool = False
 
 
 class UserProfile(BaseModel):
+    id: Optional[uuid.UUID] = None
     full_name: Optional[str] = None
+    username: Optional[str] = None
     skills: List[str] = []
     experience_level: str = "Intermediate"
     preferred_chains: List[str] = []
+    preferred_categories: List[str] = []
+    xp: int = 0
+    level: int = 1
     bio: Optional[str] = None
 
 
@@ -83,6 +93,7 @@ class SemanticSearchRequest(BaseModel):
 class ClassifyRequest(BaseModel):
     raw_text: str
     source: str = "Unknown"
+    model: Optional[str] = None
 
 
 class RiskRequest(BaseModel):
@@ -179,7 +190,7 @@ async def classify(request: ClassifyRequest):
     """
     try:
         agent = get_classifier_agent()
-        result = await agent.classify(request.raw_text, request.source)
+        result = await agent.classify(request.raw_text, request.source, request.model)
         
         return {
             "success": True,

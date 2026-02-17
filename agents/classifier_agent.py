@@ -22,7 +22,7 @@ class ClassifierAgent:
         self.api_key = GROQ_API_KEY
         self.model = GROQ_MODEL
     
-    async def classify(self, raw_text: str, source: str = "Unknown") -> Dict[str, Any]:
+    async def classify(self, raw_text: str, source: str = "Unknown", model: str = None) -> Dict[str, Any]:
         """
         Classify raw text into structured opportunity data.
         
@@ -82,7 +82,7 @@ Respond with JSON only:
                         "Content-Type": "application/json"
                     },
                     json={
-                        "model": self.model,
+                        "model": model or self.model,
                         "messages": [
                             {"role": "system", "content": "You are a Web3 opportunity classifier. Always respond with valid JSON."},
                             {"role": "user", "content": prompt}
