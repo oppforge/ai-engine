@@ -34,6 +34,6 @@ if [ -z "$GROQ_API_KEY" ]; then
     fi
 fi
 
-# Start the AI engine
-echo "🚀 Launching AI Engine on port 8001..."
-python main.py
+# Run the server
+echo "🚀 Starting AI Engine on port 8001..."
+uvicorn main:app --host 0.0.0.0 --port 8001 --reload
