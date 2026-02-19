@@ -334,13 +334,17 @@ def list_agents():
 
 if __name__ == "__main__":
     import uvicorn
+    import os
     
-    logger.info(f"🚀 Starting OppForge AI Engine on {AI_ENGINE_HOST}:{AI_ENGINE_PORT}")
+    # Priority: Environment Var (Railway) > Config File > Default
+    port = int(os.getenv("PORT", AI_ENGINE_PORT))
+    
+    logger.info(f"🚀 Starting OppForge AI Engine on {AI_ENGINE_HOST}:{port}")
     
     uvicorn.run(
         "main:app",
         host=AI_ENGINE_HOST,
-        port=AI_ENGINE_PORT,
-        reload=True,
+        port=port,
+        reload=False, # Disable reload in production
         log_level="info"
     )

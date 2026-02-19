@@ -21,5 +21,5 @@ COPY . .
 EXPOSE 8001
 
 # Command to run the application
-# Using shell form to allow environment variable expansion
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT
+# We use Python as the entrypoint so it can handle the PORT environment variable
+CMD ["python", "main.py"]
