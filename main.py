@@ -238,10 +238,18 @@ if ENABLE_CHROMADB:
         """
         try:
             client = get_chroma_client()
+            
+            # Sanitize filters: Remove empty dictionaries or nulls that crash ChromaDB
+            clean_filters = None
+            if request.filters:
+                clean_filters = {k: v for k, v in request.filters.items() if v and v != {}}
+                if not clean_filters:
+                    clean_filters = None
+            
             results = client.semantic_search(
                 query=request.query,
                 n_results=request.n_results,
-                filters=request.filters
+                filters=clean_filters
             )
             
             return {
