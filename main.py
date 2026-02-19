@@ -110,7 +110,8 @@ def root():
     return {
         "service": "OppForge AI Engine",
         "status": "operational",
-        "version": "1.0.0"
+        "version": "1.0.1",
+        "last_updated": "2026-02-19T10:30:00"
     }
 
 
