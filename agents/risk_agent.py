@@ -214,36 +214,19 @@ class RiskAgent:
             if eco_website and eco_website.replace('https://', '').replace('www.', '') in opp_url:
                 return 95.0  # Strong match
         
-        # AI verification with specific Risk Dimensions
-        prompt = f"""Conduct a deep risk assessment for this Web3 opportunity.
-Evaluate across these dimensions:
-1. Scam probability & Phishing risk
-2. Rug risk (Liquidity/Team transparency)
-3. Fake bounty detection (Is this a verified partner?)
-4. Unrealistic prize pool analysis
-5. Suspicious domain/announcement analysis
-6. Anonymous team detection
-7. Governance vote/Legitimacy check
+        # AI verification
+        prompt = f"""Is this a legitimate Web3 opportunity or potentially fraudulent?
 
-Opportunity Data:
 Title: {opportunity.get('title', '')}
-Description: {opportunity.get('description', '')[:500]}
+Description: {opportunity.get('description', '')[:300]}
 Source: {opportunity.get('source', '')}
 URL: {opportunity.get('url', '')}
-Category: {opportunity.get('category', '')}
 
 Respond with JSON only:
 {{
     "is_legitimate": true/false,
-    "risk_score": 0-100 (100 is perfectly safe),
-    "detected_dimensions": {{
-        "scam_risk": 0-100,
-        "rug_risk": 0-100,
-        "team_legitimacy": 0-100,
-        "reward_realism": 0-100
-    }},
-    "flags": ["list specifically what looks suspicious"],
-    "reasoning": "professional security analyst explanation"
+    "confidence": 0-100,
+    "reasoning": "brief explanation"
 }}
 """
         
@@ -272,11 +255,9 @@ Respond with JSON only:
                     content = json.loads(data["choices"][0]["message"]["content"])
                     
                     if content.get("is_legitimate"):
-                        # If AI says legitimate, use its risk_score or default to 80
-                        return float(content.get("risk_score", 80))
+                        return float(content.get("confidence", 70))
                     else:
-                        # If not legitimate, use its risk_score (should be low) or default to 20
-                        return float(content.get("risk_score", 20))
+                        return max(0, 100 - float(content.get("confidence", 70)))
             
             return 60.0
             

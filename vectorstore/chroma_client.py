@@ -85,33 +85,6 @@ class ChromaDBClient:
         
         logger.debug(f"Added opportunity to ChromaDB: {opportunity_id}")
     
-    def find_similar(
-        self, 
-        text: str, 
-        threshold: float = 0.85, 
-        n_results: int = 3
-    ) -> List[Dict[str, Any]]:
-        """Find existing opportunities that are semantically similar."""
-        query_embedding = self.embed_text(text)
-        
-        results = self.collection.query(
-            query_embeddings=[query_embedding],
-            n_results=n_results
-        )
-        
-        similar = []
-        if results['ids'] and len(results['ids'][0]) > 0:
-            for i in range(len(results['ids'][0])):
-                score = float(1 - results['distances'][0][i])
-                if score >= threshold:
-                    similar.append({
-                        "id": results['ids'][0][i],
-                        "similarity": score,
-                        "metadata": results['metadatas'][0][i]
-                    })
-        
-        return similar
-
     def semantic_search(
         self, 
         query: str, 
