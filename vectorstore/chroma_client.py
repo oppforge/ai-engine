@@ -5,13 +5,13 @@ Enhanced version with better semantic search and scoring.
 
 import chromadb
 from chromadb.config import Settings
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, CrossEncoder
 from typing import List, Dict, Any, Optional
 import logging
 from pathlib import Path
 import numpy as np
 
-from config import CHROMA_PATH, CHROMA_COLLECTION, EMBEDDING_MODEL
+from config import CHROMA_PATH, CHROMA_COLLECTION, EMBEDDING_MODEL, CROSS_ENCODER_MODEL
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,6 +39,11 @@ class ChromaDBClient:
         logger.info(f"Loading embedding model: {EMBEDDING_MODEL}")
         self.embedder = SentenceTransformer(EMBEDDING_MODEL)
         logger.info(f"✅ Embedding model loaded. Dim: {self.embedder.get_sentence_embedding_dimension()}")
+        
+        # Load cross-encoder for semantic re-ranking (Advanced RAG)
+        logger.info(f"Loading cross-encoder model: {CROSS_ENCODER_MODEL}")
+        self.cross_encoder = CrossEncoder(CROSS_ENCODER_MODEL)
+        logger.info("✅ Cross-Encoder loaded.")
         
         # Get or create collection
         try:
@@ -139,15 +144,21 @@ class ChromaDBClient:
         if not user_text or not opp_text:
             return 50.0  # Default score
         
-        # Generate embeddings
-        user_emb = self.embedder.encode(user_text)
-        opp_emb = self.embedder.encode(opp_text)
-        
-        # Calculate cosine similarity
-        similarity = np.dot(user_emb, opp_emb) / (np.linalg.norm(user_emb) * np.linalg.norm(opp_emb))
-        
-        # Convert to 0-100 score
-        match_score = float(max(0, min(100, (similarity + 1) * 50)))  # Map [-1,1] to [0,100]
+        # Advanced RAG: Use Cross-Encoder for highly accurate match scoring
+        # CrossEncoder expects a pair of texts and returns a logit
+        try:
+            logit = self.cross_encoder.predict([(user_text, opp_text)])[0]
+            # Convert logit (typically -10 to 10) to a 0-100 probability
+            import math
+            probability = 1 / (1 + math.exp(-logit))
+            match_score = float(max(0, min(100, probability * 100)))
+        except Exception as e:
+            logger.error(f"CrossEncoder failed, fallback to Cosine: {e}")
+            # Fallback to basic embedding cosine if CE fails
+            user_emb = self.embedder.encode(user_text)
+            opp_emb = self.embedder.encode(opp_text)
+            similarity = np.dot(user_emb, opp_emb) / (np.linalg.norm(user_emb) * np.linalg.norm(opp_emb))
+            match_score = float(max(0, min(100, (similarity + 1) * 50)))
         
         return match_score
     

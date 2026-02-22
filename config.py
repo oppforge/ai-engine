@@ -27,7 +27,8 @@ CHROMA_COLLECTION = "opportunities"
 
 # Embedding Model
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"  # 400MB, fast
-# Alternative: "sentence-transformers/all-mpnet-base-v2" # Better but 1GB
+# Advanced RAG: Cross-Encoder for highly accurate re-ranking
+CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"  # Lightweight and very accurate
 
 # Database (shared with backend)
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///../backend/oppforge.db")

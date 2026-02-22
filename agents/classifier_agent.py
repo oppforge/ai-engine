@@ -4,7 +4,8 @@ Classifier Agent - Categorizes and extracts metadata from raw opportunities.
 
 import httpx
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+from pydantic import BaseModel, Field, ValidationError
 import logging
 
 from config import GROQ_API_KEY, GROQ_MODEL, GROQ_API_URL, CLASSIFIER_TEMPERATURE, MAX_TOKENS, TIMEOUT
@@ -12,6 +13,17 @@ from config import GROQ_API_KEY, GROQ_MODEL, GROQ_API_URL, CLASSIFIER_TEMPERATUR
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+class ClassificationOutput(BaseModel):
+    is_opportunity: bool = Field(description="Whether the text represents a valid actionable Web3 opportunity")
+    category: str = Field(description="Must be exactly: Grant, Hackathon, Bounty, Airdrop, or Testnet")
+    title: str = Field(description="Action-oriented title of the opportunity")
+    chain: str = Field(description="Blockchain network, e.g. Ethereum, Solana, Multi-chain")
+    required_skills: List[str] = Field(description="List of skills required")
+    estimated_reward: str = Field(description="Value of the reward, e.g. '$50,000' or 'Unknown'")
+    deadline: Optional[str] = Field(description="Deadline in YYYY-MM-DD format, or null")
+    difficulty: str = Field(description="Beginner, Intermediate, or Expert")
+    confidence: int = Field(description="Confidence score from 0-100")
 
 class ClassifierAgent:
     """
@@ -95,8 +107,15 @@ Respond with JSON only:
                 
                 if response.status_code == 200:
                     data = response.json()
-                    result = json.loads(data["choices"][0]["message"]["content"])
-                    return result
+                    content = data["choices"][0]["message"]["content"]
+                    
+                    # Force strict Pydantic Structured Output Validation
+                    try:
+                        validated_data = ClassificationOutput.model_validate_json(content)
+                        return validated_data.model_dump()
+                    except ValidationError as ve:
+                        logger.error(f"Pydantic Validation failed, invalid AI schema: {ve}")
+                        return self._fallback_classification(raw_text)
                 else:
                     logger.error(f"Classification API error: {response.status_code}")
                     return self._fallback_classification(raw_text)
