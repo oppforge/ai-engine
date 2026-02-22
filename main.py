@@ -29,10 +29,20 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS
+# CORS - Synced with Backend
+origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "https://app.oppforge.xyz",
+    "https://app.oppforge.xyz/",
+    "https://oppforge.xyz",
+    "https://oppforge-platform.vercel.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Restrict in production
+    allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
