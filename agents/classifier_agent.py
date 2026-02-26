@@ -62,7 +62,7 @@ If it's a legitimate opportunity (grant, hackathon, bounty, airdrop, testnet), e
 1. Category (must be one of: Grant, Hackathon, Bounty, Airdrop, Testnet)
 2. Clear action-oriented title
 3. Blockchain/chain involved
-4. Required skills (programming languages, domains)
+4. Required skills: Focus on highly technical Web3 jargon (e.g., Solidity, Rust, Foundry, ZK-Rollups, Cairo, Subgraph, Cairo, Ethers.js, Vyper, CosmWasm, Account Abstraction). Be exhaustive here for accurate matchmaking.
 5. Estimated reward amount
 6. Deadline (YYYY-MM-DD format or null)
 7. Difficulty level
