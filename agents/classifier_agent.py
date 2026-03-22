@@ -58,28 +58,35 @@ class ClassifierAgent:
 Text: {raw_text[:1000]}
 Source: {source}
 
-If it's a legitimate opportunity (grant, hackathon, bounty, airdrop, testnet), extract:
-1. Category (must be one of: Grant, Hackathon, Bounty, Airdrop, Testnet)
+Web3 opportunities include: grants, hackathons, bounties, airdrops, testnets, ambassador programs.
+A BOUNTY is any task where someone can earn a reward by completing work — building, writing, designing, researching, auditing, or creating content. Bounties are ALWAYS valid opportunities even if they don't say "apply" or "register".
+
+Extract the following:
+1. Category (must be one of: Grant, Hackathon, Bounty, Airdrop, Testnet, Ambassador)
 2. Clear action-oriented title
 3. Blockchain/chain involved
-4. Required skills: Focus on highly technical Web3 jargon (e.g., Solidity, Rust, Foundry, ZK-Rollups, Cairo, Subgraph, Cairo, Ethers.js, Vyper, CosmWasm, Account Abstraction). Be exhaustive here for accurate matchmaking.
+4. Required skills: Focus on technical Web3 skills (e.g., Solidity, Rust, Foundry, ZK-Rollups, Cairo, Ethers.js, React, Node.js, Content Writing, Data Analysis). Be exhaustive for matchmaking.
 5. Estimated reward amount
 6. Deadline (YYYY-MM-DD format or null)
 7. Difficulty level
 
 Rules:
-- EXCLUDE: Generic news, partnerships without CTA, jobs, marketing hype
-- INCLUDE: Only opportunities with clear call-to-action (apply, submit, register, join)
+- INCLUDE as Bounty: Any task with a reward for building, writing, designing, creating, researching, or auditing (e.g. "Build a dashboard", "Write a thread", "Create a tutorial")
+- INCLUDE as Grant: Funding opportunities with application/proposal process
+- INCLUDE as Hackathon: Time-boxed building competitions
+- INCLUDE as Airdrop/Testnet: Network participation incentives
+- EXCLUDE: Pure news articles, partnership announcements with no reward, generic blog posts, job listings without payment
+- When source is Superteam, DoraHacks, ETHGlobal, HackQuest, Devfolio, Questbook — always mark is_opportunity=true
 
 Respond with JSON only:
 {{
     "is_opportunity": true/false,
-    "category": "Grant",
+    "category": "Bounty",
     "title": "Clear Actionable Title",
-    "chain": "Ethereum",
-    "required_skills": ["Solidity", "React"],
-    "estimated_reward": "$50,000",
-    "deadline": "2026-03-15",
+    "chain": "Solana",
+    "required_skills": ["React", "Solana", "Data Visualization"],
+    "estimated_reward": "$5,000 USDC",
+    "deadline": "2026-04-10",
     "difficulty": "Intermediate",
     "confidence": 0-100
 }}
