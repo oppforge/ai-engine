@@ -7,7 +7,7 @@ import json
 from typing import Dict, Any, List, Optional
 import logging
 
-from config import GROQ_API_KEY, GROQ_MODEL, GROQ_API_URL, CHAT_TEMPERATURE, MAX_TOKENS, TIMEOUT
+from config import GROQ_API_KEY, GROQ_MODEL, GROQ_API_URL, GEMINI_API_KEY, GEMINI_MODEL, GEMINI_API_URL, CHAT_TEMPERATURE, MAX_TOKENS, TIMEOUT
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,6 +21,8 @@ class ChatAgent:
     def __init__(self):
         self.api_key = GROQ_API_KEY
         self.model = GROQ_MODEL
+        self.gemini_api_key = GEMINI_API_KEY
+        self.gemini_model = GEMINI_MODEL
         
         self.system_prompt = """You are Forge AI, the intelligent assistant for OppForge - a Web3 opportunity discovery platform.
 
@@ -112,13 +114,35 @@ Tone: Professional yet friendly, like a knowledgeable Web3 mentor."""
                 if response.status_code == 200:
                     data = response.json()
                     return data["choices"][0]["message"]["content"]
+                elif response.status_code == 429 and self.gemini_api_key:
+                    logger.warning("Groq rate limit hit, falling back to Gemini")
+                    return await self._call_gemini(messages)
                 else:
                     logger.error(f"Groq API error: {response.status_code} - {response.text}")
                     return "I encountered an error. Please try again."
-                    
+
         except Exception as e:
             logger.error(f"Chat agent error: {e}")
             return f"I encountered an issue: {str(e)[:100]}"
+
+    async def _call_gemini(self, messages: list) -> str:
+        """Gemini fallback when Groq is rate limited."""
+        try:
+            async with httpx.AsyncClient(timeout=TIMEOUT) as client:
+                response = await client.post(
+                    GEMINI_API_URL,
+                    headers={
+                        "Authorization": f"Bearer {self.gemini_api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={"model": self.gemini_model, "messages": messages, "temperature": CHAT_TEMPERATURE, "max_tokens": MAX_TOKENS}
+                )
+                if response.status_code == 200:
+                    return response.json()["choices"][0]["message"]["content"]
+                logger.error(f"Gemini error: {response.status_code} - {response.text[:200]}")
+        except Exception as e:
+            logger.error(f"Gemini fallback error: {e}")
+        return "Forge AI is temporarily at capacity. Please try again in a moment."
     
     async def quick_evaluate(self, opportunity: Dict[str, Any]) -> str:
         """Quick evaluation of an opportunity."""
